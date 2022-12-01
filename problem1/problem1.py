@@ -121,6 +121,12 @@ if __name__ == "__main__":
     elves.inspect(verbose=True)
     print(elves)
 
+    fatties = elves.total_calories_per_elf
+    fatties.sort(reverse=True)
+    print(fatties)
+    fatties3 = sum(fatties[0:3])
+    print(fatties3)
+
 
 
 
