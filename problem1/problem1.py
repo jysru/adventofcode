@@ -83,27 +83,22 @@ class Elves:
         return sum(self.total_calories_per_elf)
 
     def inspect(self, verbose: bool = False):
-        empty_lines = self.input_data.empty_indexes
-        empty_lines.insert(0, 0)
-
-        for i in range(1, len(empty_lines) - 1):
-            if i == 1:
-                start = empty_lines[i - 1]
-                stop = empty_lines[i]
+        current = []
+        for line in self.input_data.all_lines:
+            if line:
+                current.append(line)
             else:
-                start = empty_lines[i] + 1
-                stop = empty_lines[i + 1]
+                current = [int(val) for val in current]
+                self.calories_per_elf.append(current)
+                current = []
 
-            current = self.input_data.all_lines[start:stop]
-            current_calories = self.input_data.convert_strlist_to_intlist(current)
-            self.calories_per_elf.append(current_calories)
-            self.total_calories_per_elf.append(sum(current_calories))
-            if verbose:
-                print(f"Elf #{i}\t\t start={start}\t stop={stop}\t\t cals={current_calories}")
+        # Append the last elf as well...
+        current = [int(val) for val in current]
+        self.calories_per_elf.append(current)
 
-        last_elf_calories = [int(line) for line in self.input_data.all_lines[self.input_data.empty_indexes[-1] + 1:]]
-        self.calories_per_elf.append(last_elf_calories)
-        self.total_calories_per_elf.append(sum(last_elf_calories))
+        for elf in self.calories_per_elf:
+            self.total_calories_per_elf.append(sum(elf))
+
 
     def __str__(self):
         return f"""
@@ -118,13 +113,13 @@ class Elves:
 
 if __name__ == "__main__":
     data = ElvesDataFile(file='elves_calories.txt')
+    #data = ElvesDataFile(file='elves_calories_example.txt')
     data.process()
     print(data)
 
     elves = Elves(elves_data=data)
-    elves.inspect(verbose=False)
+    elves.inspect(verbose=True)
     print(elves)
-    print(len(elves.total_calories_per_elf))
 
 
 
