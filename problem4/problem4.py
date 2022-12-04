@@ -1,6 +1,4 @@
-filename = "puzzle_input.txt"
-
-with open(filename) as f:
+with open("puzzle_input.txt") as f:
     lines = f.read().splitlines()
     lines = [line.replace("-", ",").split(",") for line in lines]
 
