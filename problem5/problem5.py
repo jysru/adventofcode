@@ -22,7 +22,7 @@ def prepare_file(file: str) -> (list[str], list[int]):
 
         return crates, moves
 
-def prepare_stacks(crates: list[str]):
+def prepare_stacks(crates: list[str], verbose: bool = False):
     stacks_number = len(re.findall("[0-9]+", crates[-1]))
     stacks_idx = []
     stacks_id = []
@@ -41,18 +41,36 @@ def prepare_stacks(crates: list[str]):
                 letter = crates[line][stacks_idx[idx]]
                 if letter and (letter != (' ' or '')):
                     stacks[idx].append(letter)
-                    print(f"Put {letter} in LIFO stack #{idx}")
             except:
                 pass
 
+    if verbose:
+        for idx, stack in enumerate(stacks):
+            print(f"Stack #{idx}: size {len(stack)}, {stack}")
+    return stacks
+
+def apply_moves(stacks: list[deque], moves: list[int], verbose: bool = False):
+    for move in moves:
+        for i in range(0, move[0]):
+            moved_crates = stacks[move[1]-1].pop()
+            stacks[move[2]-1].append(moved_crates)
+    return stacks
+
+def show_stacks(stacks: list[deque]) -> None:
     for idx, stack in enumerate(stacks):
-        print(f"Stack #{idx}: size {len(stack)}")
-        print(f"{stack}")
+        print(f"Stack #{idx}, size {len(stack)}, {stack}")
+
+def get_stacks_tops(stacks: list[deque]):
+    tops = []
+    for stack in stacks:
+        tops.append(stack[-1])
+    return tops
 
 
-
-crates, moves = prepare_file(file="test_input.txt")
-prepare_stacks(crates)
-
-
+if __name__ == "__main__":
+    crates, moves = prepare_file(file="puzzle_input.txt")
+    stacks = prepare_stacks(crates, verbose=False)
+    new_stacks = apply_moves(stacks=stacks, moves=moves, verbose=True)
+    show_stacks(new_stacks)
+    print(f"Stacks tops = {get_stacks_tops(new_stacks)}")
 
