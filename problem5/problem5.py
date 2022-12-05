@@ -1,5 +1,5 @@
 import re
-from queue import LifoQueue
+from collections import deque
 
 def prepare_file(file: str) -> (list[str], list[int]):
     with open(file) as f:
@@ -31,19 +31,23 @@ def prepare_stacks(crates: list[str]):
         stacks_id.append(int(match.group()))
         stacks_idx.append(match.start())
 
-    stacks = list(map(LifoQueue, range(0, stacks_number)))
+    stacks = []
+    for i in range(0, stacks_number):
+        stacks.append(deque([]))
+
     for idx, stack in enumerate(stacks):
-        for i in range(0, len(crates)-1):
+        for line in range(len(crates)-2, -1, -1):
+            try:
+                letter = crates[line][stacks_idx[idx]]
+                if letter and (letter != (' ' or '')):
+                    stacks[idx].append(letter)
+                    print(f"Put {letter} in LIFO stack #{idx}")
+            except:
+                pass
 
-            if stacks_idx[idx] > len(crates[i]):
-                continue
-            else:
-                print(idx, crates[i][stacks_idx[idx]])
-                stacks[idx].put(crates[i][stacks_idx[idx]])
-
-    print(stacks[0].qsize())
-    for i in range(0, stacks[0].qsize()-1):
-        print(stacks[0].get())
+    for idx, stack in enumerate(stacks):
+        print(f"Stack #{idx}: size {len(stack)}")
+        print(f"{stack}")
 
 
 
