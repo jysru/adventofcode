@@ -1,7 +1,10 @@
 import os
 
 
-class Tree:
+class Tree(object):
+    weights_lower = 0
+    total_space = 70000000
+    least_space = 30000000
 
     def __init__(self, name: str = "", subtree=None):
         self.name = name
@@ -24,6 +27,17 @@ class Tree:
         if verbose:
             print(f"Added file {name} in {self.name}")
         self.files.append({'name': name, 'weight': weight})
+
+    def get_dirs_thinner_than(self, weight:int, level: int = 0, verbose: bool = False):
+        if self.weight < weight:
+            if verbose:
+                print(level * "\t" + "- " + self.name + " (dir, size=" + str(self.weight) + ")")
+            r = self.weight
+            Tree.weights_lower = Tree.weights_lower + r
+        level += 1
+        for sub in self.subtree:
+            sub.get_dirs_thinner_than(weight=weight, verbose=verbose, level=level)
+        return Tree.weights_lower
 
     @property
     def weight(self):
@@ -71,7 +85,7 @@ def process_dirname(dirname: str):
 
 if __name__ == "__main__":
 
-    with open("test_input.txt") as f:
+    with open("puzzle_input.txt") as f:
         lines = f.read().splitlines()
 
     curdir = []
@@ -102,4 +116,5 @@ if __name__ == "__main__":
                 current_tree.add_file(name=name, weight=weight)
 
 
-root_tree.show()
+#root_tree.show()
+print(f"Sum of dir weights (at most 100k, include duplicates): {root_tree.get_dirs_thinner_than(weight=100_000, verbose=False)}")
