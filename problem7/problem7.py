@@ -3,8 +3,11 @@ import os
 
 class Tree(object):
     weights_lower = 0
-    total_space = 70000000
-    least_space = 30000000
+    total_space = 70_000_000
+    needed_space = 30_000_000
+    used_space = None
+    smallest_space = None
+    smallest_spaces = []
 
     def __init__(self, name: str = "", subtree=None):
         self.name = name
@@ -28,8 +31,12 @@ class Tree(object):
             print(f"Added file {name} in {self.name}")
         self.files.append({'name': name, 'weight': weight})
 
+    def __used_space(self):
+        _ = self.weight
+        Tree.used_space = _
+
     def get_dirs_thinner_than(self, weight:int, level: int = 0, verbose: bool = False):
-        if self.weight < weight:
+        if self.weight <= weight:
             if verbose:
                 print(level * "\t" + "- " + self.name + " (dir, size=" + str(self.weight) + ")")
             r = self.weight
@@ -38,6 +45,16 @@ class Tree(object):
         for sub in self.subtree:
             sub.get_dirs_thinner_than(weight=weight, verbose=verbose, level=level)
         return Tree.weights_lower
+
+    def get_smallest_dir_for_space(self):
+        min_size = Tree.needed_space - Tree.total_space + Tree.used_space
+        if self.weight >= min_size:
+            Tree.smallest_space = self.weight
+            Tree.smallest_spaces.append(self.weight)
+
+        for sub in self.subtree:
+            sub.get_smallest_dir_for_space()
+        return Tree.smallest_space
 
     @property
     def weight(self):
@@ -117,4 +134,7 @@ if __name__ == "__main__":
 
 
 #root_tree.show()
+root_tree._Tree__used_space()
+print(f"Root directory weight: {root_tree.weight}")
 print(f"Sum of dir weights (at most 100k, include duplicates): {root_tree.get_dirs_thinner_than(weight=100_000, verbose=False)}")
+print(f"Smallest dir weight for enough space: {root_tree.get_smallest_dir_for_space()}")
