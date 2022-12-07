@@ -137,4 +137,5 @@ if __name__ == "__main__":
 root_tree._Tree__used_space()
 print(f"Root directory weight: {root_tree.weight}")
 print(f"Sum of dir weights (at most 100k, include duplicates): {root_tree.get_dirs_thinner_than(weight=100_000, verbose=False)}")
-print(f"Smallest dir weight for enough space: {root_tree.get_smallest_dir_for_space()}")
+root_tree.get_smallest_dir_for_space()
+print(f"Smallest dir weight for enough space: {min(Tree.smallest_spaces)}")
