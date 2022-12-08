@@ -1,3 +1,5 @@
+import numpy as np
+
 class Matrix:
 
     def __init__(self, file: str = '', data: list[list[int]] = [], shape: tuple[int,int] = ()):
@@ -44,52 +46,48 @@ class Matrix:
     def _visibility_from_top(self) -> list[list[int]]:
         vis = self.generate(value=0, shape=self.shape)
         for col in range(0, self.shape[1]):
+            current_list = [self.data[i][col] for i in range(0, self.shape[1])]
             for row in range(0, self.shape[0]):
                 if row == 0:
                     vis[row][col] = 1
                 else:
-                    if self.data[row][col] <= self.data[row-1][col]:
-                        break
-                    else:
+                    if self.data[row][col] > max(current_list[0:row]):
                         vis[row][col] = 1
         return vis
 
     def _visibility_from_bottom(self) -> list[list[int]]:
         vis = self.generate(value=0, shape=self.shape)
         for col in range(self.shape[1]-1, -1, -1):
+            current_list = [self.data[i][col] for i in range(0, self.shape[1])]
             for row in range(self.shape[0]-1, -1, -1):
                 if row == self.shape[0]-1:
                     vis[row][col] = 1
                 else:
-                    if self.data[row][col] <= self.data[row-1][col]:
-                        break
-                    else:
+                    if self.data[row][col] > max(current_list[row+1:self.shape[0]]):
                         vis[row][col] = 1
         return vis
 
     def _visibility_from_left(self) -> list[list[int]]:
         vis = self.generate(value=0, shape=self.shape)
         for row in range(0, self.shape[0]):
+            current_list = [self.data[row][i] for i in range(0, self.shape[0])]
             for col in range(0, self.shape[1]):
                 if col == 0:
                     vis[row][col] = 1
                 else:
-                    if self.data[row][col] <= self.data[row][col-1]:
-                        break
-                    else:
+                    if self.data[row][col] > max(current_list[0:col]):
                         vis[row][col] = 1
         return vis
 
     def _visibility_from_right(self) -> list[list[int]]:
         vis = self.generate(value=0, shape=self.shape)
         for row in range(self.shape[0]-1, -1, -1):
+            current_list = [self.data[row][i] for i in range(0, self.shape[0])]
             for col in range(self.shape[1]-1, -1, -1):
                 if col == self.shape[1]-1:
                     vis[row][col] = 1
                 else:
-                    if self.data[row][col] <= self.data[row-1][col]:
-                        break
-                    else:
+                    if self.data[row][col] > max(current_list[col+1:self.shape[1]]):
                         vis[row][col] = 1
         return vis
 
@@ -142,4 +140,3 @@ if __name__ == "__main__":
     vis_map = mat.visibility()
     print(f"Visibility map:\n{vis_map.show()}")
     print(f"Number of visible trees: {sum(vis_map.flattened)}")
-
