@@ -99,6 +99,77 @@ class Matrix:
                     vis[row][col] = int(bool(vis[row][col]) or bool(maps[page][row][col]))
         return vis
 
+    def score(self):
+        scores = []
+        to_top = self._score_to_top()
+        print(self._score_to_bottom())
+
+
+
+
+    def _score_to_top(self) -> list[list[int]]:
+        data = np.array(self.data)
+        vis = np.zeros(shape=self.shape, dtype=int)
+        vis[1, :] = 1
+        for col in range(0, self.shape[1]):
+            for row in range(2, self.shape[0]):
+                current = np.flip(data[:row, col])
+                if data[row][col] == current[0]:
+                    vis[row][col] = 1
+                else:
+                    max, idx = np.max(current), np.argmax(current)
+                    if vis[row][col] > max:
+                        vis[row][col] = row
+                    else:
+                        vis[row][col] = idx + 1
+        return vis
+
+    def _score_to_bottom(self) -> list[list[int]]:
+        data = np.array(self.data)
+        vis = np.zeros(shape=self.shape, dtype=int)
+        vis[-2, :] = 1
+        for col in range(0, self.shape[1]):
+            for row in range(self.shape[0]-2, -1, -1):
+                current = data[0:np.abs(row+1), col]
+                print(row, current)
+                # if data[row][col] == current[0]:
+                #     vis[row][col] = 1
+                # else:
+                #     max, idx = np.max(current), np.argmax(current)
+                #     if vis[row][col] > max:
+                #         vis[row][col] = row
+                #     else:
+                #         vis[row][col] = idx + 1
+        return vis
+
+    def _score_to_left(self) -> list[list[int]]:
+        vis = self.generate(value=0, shape=self.shape)
+        for row in range(0, self.shape[0]):
+            current_list = [self.data[row][i] for i in range(0, self.shape[0])]
+            for col in range(0, self.shape[1]):
+                if col == 0:
+                    vis[row][col] = 1
+                else:
+                    if self.data[row][col] > max(current_list[0:col]):
+                        vis[row][col] = 1
+        return vis
+
+    def _score_to_right(self) -> list[list[int]]:
+        vis = self.generate(value=0, shape=self.shape)
+        for row in range(self.shape[0]-1, -1, -1):
+            current_list = [self.data[row][i] for i in range(0, self.shape[0])]
+            for col in range(self.shape[1]-1, -1, -1):
+                if col == self.shape[1]-1:
+                    vis[row][col] = 1
+                else:
+                    if self.data[row][col] > max(current_list[col+1:self.shape[1]]):
+                        vis[row][col] = 1
+        return vis
+
+    def _ind2sub(self, lin_idx: int):
+        row = lin_idx // self.shape[0]
+        col = lin_idx % self.shape[1]
+        return row, col
 
     @property
     def shape(self) -> tuple[int, int]:
@@ -134,9 +205,11 @@ class Matrix:
 
 
 if __name__ == "__main__":
-    mat = Matrix(file="puzzle_input.txt")
+    mat = Matrix(file="test_input.txt")
     print(f"Forest:\n{mat.show()}")
 
-    vis_map = mat.visibility()
-    print(f"Visibility map:\n{vis_map.show()}")
-    print(f"Number of visible trees: {sum(vis_map.flattened)}")
+    # vis_map = mat.visibility()
+    # print(f"Visibility map:\n{vis_map.show()}")
+    # print(f"Number of visible trees: {sum(vis_map.flattened)}")
+
+    mat.score()
