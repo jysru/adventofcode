@@ -34,7 +34,73 @@ class Matrix:
         return data
 
     def visibility(self):
-        pass
+        from_top = self._visibility_from_top()
+        from_left = self._visibility_from_left()
+        from_bottom = self._visibility_from_bottom()
+        from_right = self._visibility_from_right()
+        vis = self._visibility_compare([from_top, from_left, from_bottom, from_right])
+        return Matrix(data=vis)
+
+    def _visibility_from_top(self) -> list[list[int]]:
+        vis = self.generate(value=0, shape=self.shape)
+        for col in range(0, self.shape[1]):
+            for row in range(0, self.shape[0]):
+                if row == 0:
+                    vis[row][col] = 1
+                else:
+                    if self.data[row][col] <= self.data[row-1][col]:
+                        break
+                    else:
+                        vis[row][col] = 1
+        return vis
+
+    def _visibility_from_bottom(self) -> list[list[int]]:
+        vis = self.generate(value=0, shape=self.shape)
+        for col in range(self.shape[1]-1, -1, -1):
+            for row in range(self.shape[0]-1, -1, -1):
+                if row == self.shape[0]-1:
+                    vis[row][col] = 1
+                else:
+                    if self.data[row][col] <= self.data[row-1][col]:
+                        break
+                    else:
+                        vis[row][col] = 1
+        return vis
+
+    def _visibility_from_left(self) -> list[list[int]]:
+        vis = self.generate(value=0, shape=self.shape)
+        for row in range(0, self.shape[0]):
+            for col in range(0, self.shape[1]):
+                if col == 0:
+                    vis[row][col] = 1
+                else:
+                    if self.data[row][col] <= self.data[row][col-1]:
+                        break
+                    else:
+                        vis[row][col] = 1
+        return vis
+
+    def _visibility_from_right(self) -> list[list[int]]:
+        vis = self.generate(value=0, shape=self.shape)
+        for row in range(self.shape[0]-1, -1, -1):
+            for col in range(self.shape[1]-1, -1, -1):
+                if col == self.shape[1]-1:
+                    vis[row][col] = 1
+                else:
+                    if self.data[row][col] <= self.data[row-1][col]:
+                        break
+                    else:
+                        vis[row][col] = 1
+        return vis
+
+    def _visibility_compare(self, maps: list[list[list[int]]]) -> list[list[int]]:
+        vis = maps[0]
+        for page in range(1, len(maps)):
+            for row in range(0, self.shape[0]):
+                for col in range(0, self.shape[1]):
+                    vis[row][col] = int(bool(vis[row][col]) or bool(maps[page][row][col]))
+        return vis
+
 
     @property
     def shape(self) -> tuple[int, int]:
@@ -70,7 +136,10 @@ class Matrix:
 
 
 if __name__ == "__main__":
-    mat = Matrix(file="test_input.txt")
-    #mat = Matrix(data=1, shape=(3, 3))
+    mat = Matrix(file="puzzle_input.txt")
+    print(f"Forest:\n{mat.show()}")
 
-    mat.show()
+    vis_map = mat.visibility()
+    print(f"Visibility map:\n{vis_map.show()}")
+    print(f"Number of visible trees: {sum(vis_map.flattened)}")
+
