@@ -1,215 +1,99 @@
 import numpy as np
 
-class Matrix:
+def parse(file: str = "test_input.txt") -> list[list[int]]:
+    with open(file) as f:
+        lines = f.read().splitlines()
 
-    def __init__(self, file: str = '', data: list[list[int]] = [], shape: tuple[int,int] = ()):
-        self.data = None
-        if data:
-            if shape:
-                self.data = self.generate(value=data, shape=shape)
-            else:
-                self.data = data
-        else:
-            self.data = self.parse(file)
-
-    @staticmethod
-    def parse(file: str = "test_input.txt") -> list[list[int]]:
-        with open(file) as f:
-            lines = f.read().splitlines()
-
-        data = []
-        for line in lines:
-            tmp = []
-            for idx, elt in enumerate(line):
-                tmp.append(int(line[idx]))
-            data.append(tmp)
-        return data
-
-    @staticmethod
-    def generate(value: int, shape: tuple[int, int]) -> list[list[int]]:
-        data = []
-        for idx_row in range(0, shape[0]):
-            tmp = []
-            for idx_colin in range(0, shape[1]):
-                tmp.append(value)
-            data.append(tmp)
-        return data
-
-    def visibility(self):
-        from_top = self._visibility_from_top()
-        from_left = self._visibility_from_left()
-        from_bottom = self._visibility_from_bottom()
-        from_right = self._visibility_from_right()
-        vis = self._visibility_compare([from_top, from_left, from_bottom, from_right])
-        return Matrix(data=vis)
-
-    def _visibility_from_top(self) -> list[list[int]]:
-        vis = self.generate(value=0, shape=self.shape)
-        for col in range(0, self.shape[1]):
-            current_list = [self.data[i][col] for i in range(0, self.shape[1])]
-            for row in range(0, self.shape[0]):
-                if row == 0:
-                    vis[row][col] = 1
-                else:
-                    if self.data[row][col] > max(current_list[0:row]):
-                        vis[row][col] = 1
-        return vis
-
-    def _visibility_from_bottom(self) -> list[list[int]]:
-        vis = self.generate(value=0, shape=self.shape)
-        for col in range(self.shape[1]-1, -1, -1):
-            current_list = [self.data[i][col] for i in range(0, self.shape[1])]
-            for row in range(self.shape[0]-1, -1, -1):
-                if row == self.shape[0]-1:
-                    vis[row][col] = 1
-                else:
-                    if self.data[row][col] > max(current_list[row+1:self.shape[0]]):
-                        vis[row][col] = 1
-        return vis
-
-    def _visibility_from_left(self) -> list[list[int]]:
-        vis = self.generate(value=0, shape=self.shape)
-        for row in range(0, self.shape[0]):
-            current_list = [self.data[row][i] for i in range(0, self.shape[0])]
-            for col in range(0, self.shape[1]):
-                if col == 0:
-                    vis[row][col] = 1
-                else:
-                    if self.data[row][col] > max(current_list[0:col]):
-                        vis[row][col] = 1
-        return vis
-
-    def _visibility_from_right(self) -> list[list[int]]:
-        vis = self.generate(value=0, shape=self.shape)
-        for row in range(self.shape[0]-1, -1, -1):
-            current_list = [self.data[row][i] for i in range(0, self.shape[0])]
-            for col in range(self.shape[1]-1, -1, -1):
-                if col == self.shape[1]-1:
-                    vis[row][col] = 1
-                else:
-                    if self.data[row][col] > max(current_list[col+1:self.shape[1]]):
-                        vis[row][col] = 1
-        return vis
-
-    def _visibility_compare(self, maps: list[list[list[int]]]) -> list[list[int]]:
-        vis = maps[0]
-        for page in range(1, len(maps)):
-            for row in range(0, self.shape[0]):
-                for col in range(0, self.shape[1]):
-                    vis[row][col] = int(bool(vis[row][col]) or bool(maps[page][row][col]))
-        return vis
-
-    def score(self):
-        scores = []
-        to_top = self._score_to_top()
-        print(self._score_to_bottom())
+    data = []
+    for line in lines:
+        tmp = []
+        for idx, elt in enumerate(line):
+            tmp.append(int(line[idx]))
+        data.append(np.array(tmp))
+    return np.array(data)
 
 
+def get_vector(matrix: list[list[int]], index: int, axis: int = 0) -> list[int]:
+    if axis == 0:
+        return matrix[index]
+    elif axis == 1:
+        sz = matrix.shape
+        return [matrix[i][index] for i in range(0, sz[1])]
+    else:
+        raise ValueError
 
 
-    def _score_to_top(self) -> list[list[int]]:
-        data = np.array(self.data)
-        vis = np.zeros(shape=self.shape, dtype=int)
-        vis[1, :] = 1
-        for col in range(0, self.shape[1]):
-            for row in range(2, self.shape[0]):
-                current = np.flip(data[:row, col])
-                if data[row][col] == current[0]:
-                    vis[row][col] = 1
-                else:
-                    max, idx = np.max(current), np.argmax(current)
-                    if vis[row][col] > max:
-                        vis[row][col] = row
-                    else:
-                        vis[row][col] = idx + 1
-        return vis
+def visibility(data: list[list[int]]) -> list[list[int]]:
+    from_top = np.zeros(shape=data.shape, dtype=int)
+    from_bottom = np.zeros(shape=data.shape, dtype=int)
+    from_left = np.zeros(shape=data.shape, dtype=int)
+    from_right = np.zeros(shape=data.shape, dtype=int)
+    vis = np.zeros(shape=data.shape, dtype=int)
 
-    def _score_to_bottom(self) -> list[list[int]]:
-        data = np.array(self.data)
-        vis = np.zeros(shape=self.shape, dtype=int)
-        vis[-2, :] = 1
-        for col in range(0, self.shape[1]):
-            for row in range(self.shape[0]-2, -1, -1):
-                current = data[0:np.abs(row+1), col]
-                print(row, current)
-                # if data[row][col] == current[0]:
-                #     vis[row][col] = 1
-                # else:
-                #     max, idx = np.max(current), np.argmax(current)
-                #     if vis[row][col] > max:
-                #         vis[row][col] = row
-                #     else:
-                #         vis[row][col] = idx + 1
-        return vis
+    for idx in range(0, len(data)):
+        top = get_vector(matrix=data, index=idx, axis=1)
+        left = get_vector(matrix=data, index=idx, axis=0)
+        from_top[:, idx] = get_visibility(top)
+        from_left[idx, :] = get_visibility(left)
+        from_bottom[:, idx] = get_visibility(np.flip(top))
+        from_right[idx, :] = get_visibility(np.flip(left))
 
-    def _score_to_left(self) -> list[list[int]]:
-        vis = self.generate(value=0, shape=self.shape)
-        for row in range(0, self.shape[0]):
-            current_list = [self.data[row][i] for i in range(0, self.shape[0])]
-            for col in range(0, self.shape[1]):
-                if col == 0:
-                    vis[row][col] = 1
-                else:
-                    if self.data[row][col] > max(current_list[0:col]):
-                        vis[row][col] = 1
-        return vis
+    from_bottom = np.flipud(from_bottom)
+    from_right = np.fliplr(from_right)
+    return np.logical_or(np.logical_or(from_top, from_bottom), np.logical_or(from_left, from_right))
 
-    def _score_to_right(self) -> list[list[int]]:
-        vis = self.generate(value=0, shape=self.shape)
-        for row in range(self.shape[0]-1, -1, -1):
-            current_list = [self.data[row][i] for i in range(0, self.shape[0])]
-            for col in range(self.shape[1]-1, -1, -1):
-                if col == self.shape[1]-1:
-                    vis[row][col] = 1
-                else:
-                    if self.data[row][col] > max(current_list[col+1:self.shape[1]]):
-                        vis[row][col] = 1
-        return vis
 
-    def _ind2sub(self, lin_idx: int):
-        row = lin_idx // self.shape[0]
-        col = lin_idx % self.shape[1]
-        return row, col
+def get_visibility(vec):
+    vec = np.array(vec)
+    vis = np.zeros(shape=vec.shape)
+    for idx in range(0, len(vec)):
+        vis[idx] = 1 if all(vec[idx] > vec[0:idx]) else 0
+    return vis
 
-    @property
-    def shape(self) -> tuple[int, int]:
-        if self.data:
-            return len(self.data), len(self.data[0])
-        else:
-            return None
 
-    @property
-    def flattened(self) -> list[int]:
-        if self.data:
-            return [item for sublist in self.data for item in sublist]
-        else:
-            return None
+def score(data: list[list[int]]) -> list[list[int]]:
+    sc = np.zeros(shape=data.shape, dtype=int)
+    print(f"t \t b \t l \t r")
+    for r in range(0, data.shape[0]):
+        for c in range(0, data.shape[1]):
+            row = get_vector(matrix=data, index=r, axis=1)
+            col = get_vector(matrix=data, index=c, axis=0)
+            to_top = get_score(row, r, direction=-1)
+            to_bottom = get_score(row, r, direction=1)
+            to_left = get_score(col, c, direction=-1)
+            to_right = get_score(col, c, direction=1)
+            print(f"{to_top} \t {to_bottom} \t {to_left} \t {to_right}")
+            sc[r, c] = to_top * to_bottom * to_left * to_right
+    return sc
 
-    @property
-    def numel(self) -> int:
-        if self.shape:
-            prod = 1
-            for val in self.shape:
-                prod *= val
-            return prod
-        else:
-            return None
 
-    def show(self):
-        for line in self.data:
-            tmp = []
-            for idx, elt in enumerate(line):
-                tmp.append(int(line[idx]))
-            print(tmp)
+def get_score(vector: list[int], idx: int, direction: int = 1) -> int:
+    score = 0
+    if direction == 1:
+        for i in range(idx-1, -1, -1):
+            if vector[i] >= vector[idx]:
+                score += 1
 
+    elif direction == -1:
+        for i in range(idx+1, len(vector), 1):
+            if vector[i] >= vector[idx]:
+                score += 1
+
+    else:
+        raise ValueError
+    return score
 
 
 if __name__ == "__main__":
-    mat = Matrix(file="test_input.txt")
-    print(f"Forest:\n{mat.show()}")
+    data = parse(file="test_input.txt")
+    print("Trees")
+    print(data)
 
-    # vis_map = mat.visibility()
-    # print(f"Visibility map:\n{vis_map.show()}")
-    # print(f"Number of visible trees: {sum(vis_map.flattened)}")
+    vis_map = visibility(data)
+    print("Visibility map")
+    print(np.sum(vis_map))
 
-    mat.score()
+    score_map = score(data)
+    print("Score map")
+    print(score_map)
+    print(f"Max: {np.max(score_map)}")
