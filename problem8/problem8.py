@@ -53,7 +53,6 @@ def get_visibility(vec):
 
 def score(data: list[list[int]]) -> list[list[int]]:
     sc = np.zeros(shape=data.shape, dtype=int)
-    print(f"t \t b \t l \t r")
     for r in range(0, data.shape[0]):
         for c in range(0, data.shape[1]):
             row = get_vector(matrix=data, index=r, axis=1)
@@ -62,22 +61,24 @@ def score(data: list[list[int]]) -> list[list[int]]:
             to_bottom = get_score(row, r, direction=1)
             to_left = get_score(col, c, direction=-1)
             to_right = get_score(col, c, direction=1)
-            print(f"{to_top} \t {to_bottom} \t {to_left} \t {to_right}")
             sc[r, c] = to_top * to_bottom * to_left * to_right
     return sc
 
 
 def get_score(vector: list[int], idx: int, direction: int = 1) -> int:
-    score = 0
-    if direction == 1:
+    if direction == -1:
+        score = np.sum(np.where(vector[idx] > vector[:idx]))
         for i in range(idx-1, -1, -1):
-            if vector[i] >= vector[idx]:
+            if vector[i] <= vector[i-1]:
                 score += 1
+                break
 
-    elif direction == -1:
-        for i in range(idx+1, len(vector), 1):
-            if vector[i] >= vector[idx]:
+    elif direction == 1:
+        score = np.sum(np.where(vector[idx] > vector[idx+1:]))
+        for i in range(idx, len(vector)-1, 1):
+            if vector[i] < vector[i+1]:
                 score += 1
+                break
 
     else:
         raise ValueError
