@@ -45,11 +45,15 @@ def count_positions(tails):
     min_y = np.min([tail[1] for tail in tails])
     max_y = np.max([tail[1] for tail in tails])
 
-    counts = np.zeros(shape=(max_x+1, max_y+1), dtype=int)
+    len_x = max_x + 1 if min_x > 0 else max_x + np.abs(min_x) + 1
+    len_y = max_y + 1 if min_y > 0 else max_y + np.abs(min_y) + 1
+    counts = np.zeros(shape=(len_x, len_y), dtype=int)
     for x, y in tails:
-        counts[x, y] += 1
+        counts[x + np.abs(min_x), y + np.abs(min_y)] += 1
 
     return counts
+
+
 def update_head(head, dir):
     sign = 1 if dir in {"R", "U"} else -1
     if dir in {"R", "L"}:
@@ -70,7 +74,7 @@ def update_tail(head, tail):
 
 
 if __name__ == "__main__":
-    moves = parse(file="test_input.txt")
+    moves = parse(file="puzzle_input.txt")
     tails = apply_moves(moves)
     print(tails)
     pos = count_positions(tails)
