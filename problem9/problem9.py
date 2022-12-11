@@ -81,8 +81,8 @@ class Rope:
             max_x = np.max([pos[0] for pos in knots_positions])
             min_y = np.min([pos[1] for pos in knots_positions])
             max_y = np.max([pos[1] for pos in knots_positions])
-            self.knots_min_positions.append((min_x, max_x))
-            self.knots_max_positions.append((min_y, max_y))
+            self.knots_min_positions.append((min_x, min_y))
+            self.knots_max_positions.append((max_x, max_y))
             len_x.append(max_x + 1 if min_x > 0 else max_x + np.abs(min_x) + 1)
             len_y.append(max_y + 1 if min_y > 0 else max_y + np.abs(min_y) + 1)
 
@@ -93,6 +93,14 @@ class Rope:
             counts[np.where(counts >= 1)] = 1
             self.unique_positions.append(counts)
         return self.unique_positions
+
+    def show_last_positions(self):
+        last = np.zeros(shape=self.unique_positions[0].shape, dtype=int)
+        for k in range(self.knots_number-1, -1, -1):
+            x, y = self.knots_positions[k][-1]
+            last[x + np.abs(self.knots_min_positions[k][0]), y + np.abs(self.knots_min_positions[k][1])] = k + 1
+        print(f"Last positions:")
+        print(last)
 
 
 if __name__ == "__main__":
@@ -105,3 +113,7 @@ if __name__ == "__main__":
     for i in range(0, knots):
         print(f"Counts for knot #{i}: {np.count_nonzero(rope.unique_positions[i])}")
         print(rope.unique_positions[i])
+
+    rope.show_last_positions()
+
+
