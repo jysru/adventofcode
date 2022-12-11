@@ -15,7 +15,7 @@ class Position:
         return f"x = {self.x}, y = {self.y}"
 
 
-def parse(file: str = "test_input.txt") -> list[list[int]]:
+def parse(file: str = "test_input1.txt") -> list[list[int]]:
     with open(file) as f:
         lines = f.read().splitlines()
 
@@ -27,17 +27,20 @@ def parse(file: str = "test_input.txt") -> list[list[int]]:
 
 def apply_moves(moves: tuple[list[str], list[int]]):
     dirs, nums = moves
-    start = Position(x=0, y=0)
     head = Position(x=0, y=0)
-    tail = Position(x=0, y=0)
+    tails = [Position(x=0, y=0) for i in range(0, 9)]
+    tails_xy = [[(t.x, t.y)] for i, t in enumerate(tails)]
 
-    tails = [(tail.x, tail.y)]
     for i in range(0, len(dirs)):
         for j in range(0, nums[i]):
             update_head(head, dirs[i])
-            update_tail(head, tail)
-            tails.append((tail.x, tail.y))
-    return tails
+            for k, t in enumerate(tails):
+                if k == 0:
+                    update_tail(head, t)
+                else:
+                    update_tail(tails[k-1], t)
+                tails_xy[k].append((tails[k].x, tails[k].y))
+    return tails_xy
 
 def count_positions(tails):
     min_x = np.min([tail[0] for tail in tails])
@@ -50,7 +53,7 @@ def count_positions(tails):
     counts = np.zeros(shape=(len_x, len_y), dtype=int)
     for x, y in tails:
         counts[x + np.abs(min_x), y + np.abs(min_y)] += 1
-
+    counts[np.where(counts >= 1)] = 1
     return counts
 
 
@@ -74,10 +77,10 @@ def update_tail(head, tail):
 
 
 if __name__ == "__main__":
-    moves = parse(file="puzzle_input.txt")
+    moves = parse(file="test_input2.txt")
     tails = apply_moves(moves)
     print(tails)
-    pos = count_positions(tails)
+    pos = count_positions(tails[-1])
     print(pos)
     print(f"Num pos = {np.count_nonzero(pos)}")
 
