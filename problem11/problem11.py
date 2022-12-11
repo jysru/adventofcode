@@ -58,15 +58,20 @@ class ParseMonkeys:
         monkey_id_false = self._parse_test_monkey_id(lines[2])
         return div, monkey_id_true, monkey_id_false
 
-    def _parse_test_divider(self, line: str) -> int:
+    @staticmethod
+    def _parse_test_divider(line: str) -> int:
         res = re.findall("[0-9]+", line)
         res = list(map(int, res))
         return res[0]
 
-    def _parse_test_monkey_id(self, line: str) -> int:
+    @staticmethod
+    def _parse_test_monkey_id(line: str) -> int:
         res = re.findall("[0-9]+", line)
         res = list(map(int, res))
         return res[0]
+
+    def _callable_monkey_test(self, test: tuple[int, int, int]):
+        call = lambda a: a
 
     def show(self):
         print("Parsing results:")
@@ -75,17 +80,19 @@ class ParseMonkeys:
 
 
 class Monkey:
-    def __init__(self):
-        self.id: int
-        self.items: list[int]
-        self.operation: callable(int)
-        self.test: callable(int)
-        self.divisor: int
-        self.insp: int
+    def __init__(self, id: int, items: list[int], operation: callable, test: callable):
+        self.id: id
+        self.items: items
+        self.operation: operation
+        self.test: test
 
 
 if __name__ == "__main__":
-    p = ParseMonkeys(file="test_input.txt")
+    parsed = ParseMonkeys(file="test_input.txt")
+
+    monkeys = []
+    for parsedMonkey in parsed:
+        monkeys.append(Monkey())
     p.show()
     m = Monkey()
 
