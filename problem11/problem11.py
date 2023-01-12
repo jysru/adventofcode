@@ -1,4 +1,5 @@
 import re
+from math import floor
 
 
 class ParseMonkeys:
@@ -80,19 +81,100 @@ class ParseMonkeys:
 
 
 class Monkey:
-    def __init__(self, id: int, items: list[int], operation: callable, test: callable):
-        self.id: id
-        self.items: items
-        self.operation: operation
-        self.test: test
+    def __init__(self, id: int, items: list[int], operation: callable, test: callable) -> None:
+        self.id = id
+        self.items = items
+        self.operation = operation
+        self.test_tuple = test
+        self.worry = None
+        self.activity = 0
+
+    def play_round(self, others, debug: bool = False):
+        print(f"Monkey {self.id}'s round:")
+        while (self.items):
+            self.__inspect(debug=debug)
+            self.__throw(others=others, debug=debug)
+
+    def __inspect(self, debug: bool = False) -> int:
+        if self.items:
+            self.worry = self.items[0]
+            self.activity += 1
+            if debug: print(f"  Monkey inspects item with worry level {self.items[0]}")
+            self.worry = self.operation(self.worry)
+            if debug: print(f"    Worry level becomes {self.operation(self.items[0])}")
+            self.worry = floor(self.worry/3)
+            if debug: print(f"    Monkey gets bored with item. Worry level is divided by 3 to {self.worry}.")
+
+    def __throw(self, others, debug: bool = False) -> None:
+        other_id = self.__test(debug=debug)
+        others[other_id].items.append(self.worry)
+        self.items.pop(0)
+        if debug: print(f"    Item with worry level {self.worry} is thrown to monkey {other_id}")
+        self.worry = None
+
+    def __test(self, debug: bool = False) -> int:
+        if (self.worry % self.test_tuple[0] == 0):
+            if debug: print(f"    Current worry level is divisible by {self.test_tuple[0]}")
+            return self.test_tuple[1]    
+        else:
+            if debug: print(f"    Current worry level is not divisible by {self.test_tuple[0]}")
+            return self.test_tuple[2]
+            
+
+    def __str__(self) -> str:
+        return f"""
+        Monkey {self.id}
+        - Items: {self.items}
+        - Operation: {self.operation}
+        - Test: {self.test_tuple}
+        - Activity: {self.activity}
+        """
+
+
+class MonkeyGroup:
+
+    def __init__(self, monkeys: list[Monkey]) -> None:
+        self.monkeys = monkeys
+
+    def do_rounds(self, rounds: int = 20, debug: bool = False) -> None:
+        for round in range(1, rounds+1):
+            for monkey in self.monkeys:
+                monkey.play_round(others=self.monkeys, debug=True)
+            print(f"After round {round}:")
+            self.check_items()
+
+    def check_items(self) -> None:
+        for monkey in self.monkeys:
+            print(f"  Monkey {monkey.id}: {monkey.items}")
+
+    @property
+    def business_level(self):
+        activities = sorted(self.get_activity(), reverse=True)
+        return activities[0]*activities[1]
+
+    def get_activity(self) -> list:
+        return [monkey.activity for monkey in self.monkeys]
+
+    def show_activity(self) -> None:
+        for monkey in self.monkeys:
+            print(f"Monkey {monkey.id} inspected items {monkey.activity} times")
 
 
 if __name__ == "__main__":
-    parsed = ParseMonkeys(file="test_input.txt")
+    parse = ParseMonkeys(file="puzzle_input.txt")
 
     monkeys = []
-    for parsedMonkey in parsed:
-        monkeys.append(Monkey())
-    p.show()
-    m = Monkey()
+    for monkey in parse.parsed:
+        id, items, operation, test_tuple = monkey
+        m = Monkey(id=id, items=items, operation=operation, test=test_tuple)
+        monkeys.append(m)
+
+    monkey_group = MonkeyGroup(monkeys=monkeys)
+    monkey_group.do_rounds(rounds=20, debug=False)
+    monkey_group.show_activity()
+    print(monkey_group.get_activity())
+    print(monkey_group.business_level)
+
+
+
 
