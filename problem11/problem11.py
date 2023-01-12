@@ -139,7 +139,7 @@ class MonkeyGroup:
     def do_rounds(self, rounds: int = 20, debug: bool = False) -> None:
         for round in range(1, rounds+1):
             for monkey in self.monkeys:
-                monkey.play_round(others=self.monkeys, debug=True)
+                monkey.play_round(others=self.monkeys, debug=debug)
             print(f"After round {round}:")
             self.check_items()
 
@@ -161,7 +161,7 @@ class MonkeyGroup:
 
 
 if __name__ == "__main__":
-    parse = ParseMonkeys(file="puzzle_input.txt")
+    parse = ParseMonkeys(file="test_input.txt")
 
     monkeys = []
     for monkey in parse.parsed:
@@ -170,7 +170,7 @@ if __name__ == "__main__":
         monkeys.append(m)
 
     monkey_group = MonkeyGroup(monkeys=monkeys)
-    monkey_group.do_rounds(rounds=20, debug=False)
+    monkey_group.do_rounds(rounds=1000, debug=False)
     monkey_group.show_activity()
     print(monkey_group.get_activity())
     print(monkey_group.business_level)
