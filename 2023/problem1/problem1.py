@@ -35,14 +35,17 @@ if __name__ == "__main__":
     with open(filename) as file:
         lines = file.read().splitlines()
 
-    total = 0
+    solution_1, solution_2 = 0, 0
     for line in lines:
-        digits = get_digits(line, include_words=True)
-        digits2 = words_to_digits(digits.copy())
-        print(f"{digits} -> {digits2}")
-        total += int(digits2[0] + digits2[-1])
+        digits1 = get_digits(line, include_words=False)
+        solution_1 += int(digits1[0] + digits1[-1])
 
-    
-    print(total)
+        digits2 = get_digits(line, include_words=True)
+        digits2_words = words_to_digits(digits2.copy())
+        print(f"{digits2} -> {digits2_words}")
+        solution_2 += int(digits2_words[0] + digits2_words[-1])
+
+    print(f"Solution 1: {solution_1}")
+    print(f"Solution 2: {solution_2}")
 
 
