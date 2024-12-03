@@ -11,10 +11,7 @@ if __name__ == '__main__':
     with open(file, 'r') as f:
         data = f.read()
 
-    print(data)
-
     matches = re.findall(extract_regex, data, flags=0)
-    print(matches)
 
     result = 0
     for match in matches:
