@@ -8,32 +8,18 @@ word = list("XMAS")
 pad_char = "."
 
 
-def parse_file(file: str) -> list[list]:
+def parse_file(file: str) -> np.ndarray:
     with open(file, "r") as f:
         data = f.readlines()
         data = [list(line.rstrip()) for line in data]
-    return data
+    return np.array(data)
 
 
-def pad_array(data: list[list], word: list) -> list[list]:
+def pad_array(data: np.ndarray, word: list) -> np.ndarray:
     pad_length = len(word) - 1
     if pad_length > 0:
-        # Append empty elements on each remaining line on the left and the right
-        empty_side = list(pad_char * pad_length)
-        for i in range(len(data)):
-            data[i] = empty_side + data[i] + empty_side
-
-        # Append empty rows at the top and the bottom
-        empty_row = list(pad_char * len(data[0]))
-        for _ in range(pad_length):
-            data.insert(0, empty_row)
-            data.append(empty_row)
+        data = np.pad(data, pad_length, constant_values=pad_char)
     return data
-
-
-def print_2d_array(data: list[list]) -> None:
-    for line in data:
-        print("".join(line))
 
 
 def word_in_list(data: list, word: list, add_reverse: bool = True) -> int:
@@ -46,8 +32,7 @@ def word_in_list(data: list, word: list, add_reverse: bool = True) -> int:
     return count
 
 
-def get_sublist(data: list[list], coords: tuple[int, int], word: list, direction: int = 0):
-    # Angle descriptions consider a trigonometric circle starting on the right and going counterclockwise
+def get_vector(data: list[list], coords: tuple[int, int], word: list, direction: str = 'r'):
     row, col = coords
     len_word = len(word)
 
@@ -67,6 +52,8 @@ def get_sublist(data: list[list], coords: tuple[int, int], word: list, direction
         sublist = [data[row + i][col] for i in range(len_word)]
     if direction == 7: # Starting from coordinate (included), direction is -45° (vertical, towards the south-east)
         sublist = [data[row + i][col + i] for i in range(len_word)]
+    else:
+        ValueError('Invalid direction')
 
     return sublist
 
@@ -75,17 +62,19 @@ def get_sublist(data: list[list], coords: tuple[int, int], word: list, direction
 if __name__ == "__main__":
     data = parse_file(file)
     data = pad_array(data, word)
-    print_2d_array(data)
+    print(data)
+    
+    directions = [0, 5, 6, 7]
 
     counter = 0
     for i_row in range(len(word) - 1, len(data) - (len(word) - 1)):
         for i_col in range(len(word) - 1, len(data[0]) - (len(word) - 1)):
-            for direction in range(8):
-                sublist = get_sublist(data, (i_row, i_col), word, direction)
+            # for direction in range(8):
+            for direction in directions:
+                sublist = get_vector(data, (i_row, i_col), word, direction)
                 counter += word_in_list(sublist,  word, add_reverse=True)
             
     print(counter)
-
 
     # print(data)
     # print(data[0][1] * 3)
