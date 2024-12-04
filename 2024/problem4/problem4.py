@@ -4,7 +4,7 @@ import numpy as np
 
 file = "example.txt"
 # file = "puzzle.txt"
-word = list("XMAS")
+word = np.array(list("XMAS"))
 pad_char = "."
 
 
@@ -22,40 +22,39 @@ def pad_array(data: np.ndarray, word: list) -> np.ndarray:
     return data
 
 
-def word_in_list(data: list, word: list, add_reverse: bool = True) -> int:
+def word_in_list(data: np.ndarray, word: np.ndarray, add_reverse: bool = True) -> int:
     count = 0
-    if data == word:
+    if np.all(data.flatten() == word.flatten()):
         count += 1
     if add_reverse:
-        if data == word.reverse():
+        if np.all(data.flatten() == np.flip(word).flatten()):
             count += 1
     return count
 
 
-def get_vector(data: list[list], coords: tuple[int, int], word: list, direction: str = 'r'):
+def get_vector(data: np.ndarray, coords: tuple[int, int], word: list, direction: str = "r") -> np.ndarray:
     row, col = coords
-    len_word = len(word)
 
-    if direction == 0: # Starting from coordinate (included), direction is 0° (horizontal, towards the east)
-        sublist = [data[row][col + i] for i in range(len_word)]
-    if direction == 1: # Starting from coordinate (included), direction is 45° (vertical, towards the north-east)
-        sublist = [data[row - i][col + i] for i in range(len_word)].reverse()
-    if direction == 2: # Starting from coordinate (included), direction is 90° (vertical, towards north)
-        sublist = [data[row - i][col] for i in range(len_word)].reverse()
-    if direction == 3: # Starting from coordinate (included), direction is 135° (diagonal, towards north-west)
-        sublist = [data[row - i][col - i] for i in range(len_word)].reverse()
-    if direction == 4: # Starting from coordinate (included), direction is 180° (horizontal, towards the west)
-        sublist = [data[row][col - i] for i in range(len_word)].reverse()
-    if direction == 5: # Starting from coordinate (included), direction is -135° (vertical, towards the north-east)
-        sublist = [data[row + i][col - i] for i in range(len_word)]
-    if direction == 6: # Starting from coordinate (included), direction is -90° (vertical, towards the south)
-        sublist = [data[row + i][col] for i in range(len_word)]
-    if direction == 7: # Starting from coordinate (included), direction is -45° (vertical, towards the south-east)
-        sublist = [data[row + i][col + i] for i in range(len_word)]
+    if direction == "r":
+        vector = data[row, col:(col+len(word))]
+    if direction == "l":
+        vector = data[row, (col-(len(word) - 1)):(col+1)]
+    if direction == "u":
+        vector = data[(row-(len(word) - 1)):(row+1), col]
+    if direction == "d":
+        vector = data[row:(row+len(word)), col]
+    if direction == "dr":
+        vector = np.diag(data[row:(row+len(word)), col:(col+len(word))])
+    if direction == "ur":
+        vector = np.diag(data[(row-(len(word) - 1)):(row+1), col:(col+len(word))])
+    if direction == "dl":
+        vector = np.diag(data[row:(row+len(word)), (col-(len(word) - 1)):(col+1)])
+    if direction == "ul":
+        vector = np.diag(data[(row-(len(word) - 1)):(row+1), (col-(len(word) - 1)):(col+1)])
     else:
         ValueError('Invalid direction')
 
-    return sublist
+    return vector
 
 
 
@@ -64,15 +63,14 @@ if __name__ == "__main__":
     data = pad_array(data, word)
     print(data)
     
-    directions = [0, 5, 6, 7]
+    directions = ["r", "d", "dr", "dl"]
 
     counter = 0
-    for i_row in range(len(word) - 1, len(data) - (len(word) - 1)):
-        for i_col in range(len(word) - 1, len(data[0]) - (len(word) - 1)):
-            # for direction in range(8):
+    for i_row in range(len(word) - 1, data.shape[0] - (len(word) - 1)):
+        for i_col in range(len(word) - 1, data.shape[1] - (len(word) - 1)):
             for direction in directions:
-                sublist = get_vector(data, (i_row, i_col), word, direction)
-                counter += word_in_list(sublist,  word, add_reverse=True)
+                vector = get_vector(data, (i_row, i_col), word, direction)
+                counter += word_in_list(vector,  word, add_reverse=True)
             
     print(counter)
 
