@@ -62,14 +62,14 @@ if __name__ == "__main__":
     data = pad_array(data, word)
     print(data)
     
-    directions = ["r", "d", "dr", "dl"]
+    directions = ["r", "d", "l", "u", "dr", "dl", "ur", "ul"]
 
     counter = 0
     for i_row in range(len(word) - 1, data.shape[0] - (len(word) - 1)):
         for i_col in range(len(word) - 1, data.shape[1] - (len(word) - 1)):
             for direction in directions:
                 vector = get_vector(data, (i_row, i_col), word, direction)
-                counter += word_in_list(vector,  word, add_reverse=True)
+                counter += word_in_list(vector,  word, add_reverse=False)
             
     print(counter)
 
