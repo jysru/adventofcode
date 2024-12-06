@@ -2,7 +2,7 @@ import numpy as np
 
 
 file = "example.txt"
-# file = "puzzle.txt"
+file = "puzzle.txt"
 word = np.array(list("XMAS"))
 pad_char = "."
 
@@ -37,19 +37,26 @@ def get_vector(data: np.ndarray, coords: tuple[int, int], word: list, direction:
     if direction == "r":
         vector = data[row, col:(col+len(word))]
     if direction == "l":
-        vector = data[row, (col-(len(word) - 1)):(col+1)]
+        vector = np.flip(data[row, (col-(len(word) - 1)):(col+1)])
     if direction == "u":
-        vector = data[(row-(len(word) - 1)):(row+1), col]
+        vector = np.flip(data[(row-(len(word) - 1)):(row+1), col])
     if direction == "d":
         vector = data[row:(row+len(word)), col]
     if direction == "dr":
-        vector = np.diag(data[row:(row+len(word)), col:(col+len(word))])
-    if direction == "ur":
-        vector = np.diag(data[(row-(len(word) - 1)):(row+1), col:(col+len(word))])
+        matrix = data[row:(row+len(word)), col:(col+len(word))]
+        vector = np.diag(matrix)
     if direction == "dl":
-        vector = np.diag(data[row:(row+len(word)), (col-(len(word) - 1)):(col+1)])
+        matrix = data[row:(row+len(word)), (col-(len(word) - 1)):(col+1)]
+        vector = np.diag(np.fliplr(matrix))
+
+    if direction == "ur":
+        matrix = data[(row-(len(word) - 1)):(row+1), col:(col+len(word))]
+        vector = np.diag(np.flipud(matrix))
+    
     if direction == "ul":
-        vector = np.diag(data[(row-(len(word) - 1)):(row+1), (col-(len(word) - 1)):(col+1)])
+        matrix = data[(row-(len(word) - 1)):(row+1), (col-(len(word) - 1)):(col+1)]
+        vector = np.flip(np.diag(matrix))
+    
     else:
         ValueError('Invalid direction')
 
@@ -63,12 +70,15 @@ if __name__ == "__main__":
     print(data)
     
     directions = ["r", "d", "l", "u", "dr", "dl", "ur", "ul"]
+    # directions = ["ul"]
 
     counter = 0
     for i_row in range(len(word) - 1, data.shape[0] - (len(word) - 1)):
         for i_col in range(len(word) - 1, data.shape[1] - (len(word) - 1)):
             for direction in directions:
                 vector = get_vector(data, (i_row, i_col), word, direction)
+                if i_row == 4:
+                    print(i_row, i_col, vector)
                 counter += word_in_list(vector,  word, add_reverse=False)
             
     print(counter)
