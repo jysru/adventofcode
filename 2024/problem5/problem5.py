@@ -55,12 +55,31 @@ if __name__ == "__main__":
     middle_pages_sum = 0
     for i, page in enumerate(pages):
         if valid_pages[i]:
-            print(page[len(page)//2])
             middle_pages_sum += page[len(page)//2]
 
     print(middle_pages_sum)
     
-    
+
+    incorrect_pages = [list(page) for i, page in enumerate(pages) if not valid_pages[i]]
+    print(incorrect_pages)
+
+    corrected_pages = []
+    for wrong_page in incorrect_pages:
+        for k in range(50):
+            for rule in rules:
+                if rule[0] in wrong_page and rule[1] in wrong_page:
+                    if wrong_page.index(rule[0]) > wrong_page.index(rule[1]):
+                        wrong_page[wrong_page.index(rule[0])] = rule[1]
+                        wrong_page[wrong_page.index(rule[1])] = rule[0]
+        corrected_pages.append(wrong_page)
+    print(corrected_pages)
+
+
+    corr_middle_pages_sum = 0
+    for i, page in enumerate(corrected_pages):
+            corr_middle_pages_sum += page[len(page)//2]
+
+    print(corr_middle_pages_sum)
     # print(rules_numbers)
 
 
